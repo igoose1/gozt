@@ -12,8 +12,6 @@ import (
 	"strconv"
 )
 
-type set map[int64]struct{}
-
 var (
 	Cwd           string
 	validNoteName = regexp.MustCompile(`\d{4}`)
@@ -49,24 +47,28 @@ func a() ([]string, error) {
 	return notes, dir.Close()
 }
 
-func drawDot(graph []set, connections int, maxConnections int) string {
-	result := make([]byte, 0, 1<<5+2*connections*(5+4))
+type edge struct {
+	from, to int64
+}
+
+func drawDot(graph map[edge]struct{}, linkNumber []int, maxPrivateConnections int) string {
+	result := make([]byte, 0, 1<<5*(2 + len(linkNumber) + len(graph)))
+
 	result = append(result, "graph zt {\n"...)
-	for from, linkedTo := range graph {
-		penwidth := 15 * float64(len(linkedTo)) / float64(maxConnections)
+	for i, ln := range linkNumber {
+		penwidth := 15 * float64(ln) / float64(maxPrivateConnections)
 		if penwidth < 1 {
 			penwidth = 1
 		}
-		attrs := fmt.Sprintf("\t%04d [penwidth = %f]\n", from, penwidth)
+		attrs := fmt.Sprintf("\t%04d [penwidth = %f]\n", i, penwidth)
 		result = append(result, attrs...)
-		if len(linkedTo) == 0 {
-			continue
-		}
-		result = append(result, fmt.Sprintf("\t%04d", from)...)
-		for to := range linkedTo {
-			result = append(result, fmt.Sprintf(" -- %04d", to)...)
-		}
-		result = append(result, ";\n"...)
+	}
+
+	for e := range graph {
+		result = append(
+			result,
+			fmt.Sprintf("\t%04d -- %04d;\n", e.from, e.to)...,
+		)
 	}
 	result = append(result, "}"...)
 	return string(result)
@@ -78,13 +80,10 @@ func g() (string, error) {
 		return "", err
 	}
 
-	graph := make([]set, len(allNotes))
-	for i := 0; i < len(allNotes); i++ {
-		graph[i] = make(set)
-	}
+	maxPrivateConnections := 0
+	graph := make(map[edge]struct{})
+	linkNumber := make([]int, len(allNotes))
 
-	connections, maxConnections := 0, 0
-	var exists = struct{}{}
 	for _, noteName := range allNotes {
 		data, err := ioutil.ReadFile(noteName)
 		if err != nil {
@@ -92,22 +91,27 @@ func g() (string, error) {
 		}
 		text := string(data)
 		for _, linkedTo := range validNoteLink.FindAllString(text, -1) {
-			from, _ := strconv.ParseInt(noteName, 10, 32)
-			to, _ := strconv.ParseInt(linkedTo[1:], 10, 32)
+			from, _ := strconv.ParseInt(noteName, 10, 64)
+			to, _ := strconv.ParseInt(linkedTo[1:], 10, 64)
 
-			connections++
-			graph[from][to] = exists
-			graph[to][from] = exists
-			if len(graph[from]) > maxConnections {
-				maxConnections = len(graph[from])
+			if from > to {
+				from, to = to, from
 			}
-			if len(graph[to]) > maxConnections {
-				maxConnections = len(graph[to])
+
+			graph[edge{from, to}] = struct{}{}
+			linkNumber[from]++
+			linkNumber[to]++
+
+			if linkNumber[from] > maxPrivateConnections {
+				maxPrivateConnections = linkNumber[from]
+			}
+			if linkNumber[to] > maxPrivateConnections {
+				maxPrivateConnections = linkNumber[to]
 			}
 		}
 	}
 
-	result := drawDot(graph, connections, maxConnections)
+	result := drawDot(graph, linkNumber, maxPrivateConnections)
 
 	return result, err
 }
