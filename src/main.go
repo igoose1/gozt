@@ -54,13 +54,18 @@ type edge struct {
 func drawDot(graph map[edge]struct{}, linkNumber []int, maxPrivateConnections int) string {
 	result := make([]byte, 0, 1<<5*(2 + len(linkNumber) + len(graph)))
 
-	result = append(result, "digraph zt {\n"...)
+	result = append(
+		result,
+		"digraph zt {\n" +
+		"\tgraph [truecolor=true bgcolor=pink model=subset]\n"+
+		"\tnode [colorscheme=ylgn9 style=filled shape=circle];\n"...,
+	)
 	for i, ln := range linkNumber {
-		penwidth := 15 * float64(ln) / float64(maxPrivateConnections)
-		if penwidth < 1 {
-			penwidth = 1
+		color := int(8 * float64(ln) / float64(maxPrivateConnections))
+		if color < 1 {
+			color = 1
 		}
-		attrs := fmt.Sprintf("\t%04d [penwidth = %f]\n", i, penwidth)
+		attrs := fmt.Sprintf("\t%04d [color=%d];\n", i, color)
 		result = append(result, attrs...)
 	}
 
