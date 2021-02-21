@@ -54,7 +54,7 @@ type edge struct {
 func drawDot(graph map[edge]struct{}, linkNumber []int, maxPrivateConnections int) string {
 	result := make([]byte, 0, 1<<5*(2 + len(linkNumber) + len(graph)))
 
-	result = append(result, "graph zt {\n"...)
+	result = append(result, "digraph zt {\n"...)
 	for i, ln := range linkNumber {
 		penwidth := 15 * float64(ln) / float64(maxPrivateConnections)
 		if penwidth < 1 {
@@ -67,7 +67,7 @@ func drawDot(graph map[edge]struct{}, linkNumber []int, maxPrivateConnections in
 	for e := range graph {
 		result = append(
 			result,
-			fmt.Sprintf("\t%04d -- %04d;\n", e.from, e.to)...,
+			fmt.Sprintf("\t%04d -> %04d;\n", e.from, e.to)...,
 		)
 	}
 	result = append(result, "}"...)
@@ -91,17 +91,11 @@ func g() (string, error) {
 		}
 		text := string(data)
 		for _, linkedTo := range validNoteLink.FindAllString(text, -1) {
-			from, _ := strconv.ParseInt(noteName, 10, 64)
-			to, _ := strconv.ParseInt(linkedTo[1:], 10, 64)
-
-			if from > to {
-				from, to = to, from
-			}
-			log.Print(from, to)
+			from, _ := strconv.ParseInt(linkedTo[1:], 10, 64)
+			to, _ := strconv.ParseInt(noteName, 10, 64)
 
 			graph[edge{from, to}] = struct{}{}
 			linkNumber[from]++
-			linkNumber[to]++
 
 			if linkNumber[from] > maxPrivateConnections {
 				maxPrivateConnections = linkNumber[from]
