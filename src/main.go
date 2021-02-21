@@ -79,6 +79,26 @@ func drawDot(graph map[edge]struct{}, linkNumber []int, maxPrivateConnections in
 	return string(result)
 }
 
+func contains(where []string, what string) bool {
+	for _, element := range(where) {
+		if element == what {
+			return true
+		}
+	}
+	return false
+}
+
+// Do not play with that a lot, child! It's O(N^2).
+func unique(array []string) []string {
+	result := make([]string, 0, len(array))
+	for _, element := range array {
+		if !contains(result, element) {
+			result = append(result, element)
+		}
+	}
+	return result
+}
+
 func g() (string, error) {
 	allNotes, err := a()
 	if err != nil {
@@ -95,7 +115,7 @@ func g() (string, error) {
 			return "", err
 		}
 		text := string(data)
-		for _, linkedTo := range validNoteLink.FindAllString(text, -1) {
+		for _, linkedTo := range unique(validNoteLink.FindAllString(text, -1)) {
 			from, _ := strconv.ParseInt(linkedTo[1:], 10, 64)
 			to, _ := strconv.ParseInt(noteName, 10, 64)
 
