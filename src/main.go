@@ -61,6 +61,9 @@ func drawDot(graph map[edge]struct{}, linkNumber []int, maxPrivateConnections in
 		"\tnode [colorscheme=ylgn9 style=filled shape=circle];\n"...,
 	)
 	for i, ln := range linkNumber {
+		if ln == 0 {
+			continue
+		}
 		color := int(8 * float64(ln) / float64(maxPrivateConnections))
 		if color < 1 {
 			color = 1
@@ -99,15 +102,35 @@ func unique(array []string) []string {
 	return result
 }
 
+func maxStringSlice(array []string) string {
+	ans_index := 0
+	for i, value := range array {
+		if value > array[ans_index] {
+			ans_index = i
+		}
+	}
+	return array[ans_index]
+}
+
+func maxIntSlice(array []int) int {
+	ans_index := 0
+	for i, value := range array {
+		if value > array[ans_index] {
+			ans_index = i
+		}
+	}
+	return array[ans_index]
+}
+
 func g() (string, error) {
 	allNotes, err := a()
 	if err != nil {
 		return "", err
 	}
 
-	maxPrivateConnections := 0
 	graph := make(map[edge]struct{})
-	linkNumber := make([]int, len(allNotes))
+	maxNode, _ := strconv.ParseInt(maxStringSlice(allNotes), 10, 64)
+	linkNumber := make([]int, maxNode + 1)
 
 	for _, noteName := range allNotes {
 		data, err := ioutil.ReadFile(noteName)
@@ -121,17 +144,10 @@ func g() (string, error) {
 
 			graph[edge{from, to}] = struct{}{}
 			linkNumber[from]++
-
-			if linkNumber[from] > maxPrivateConnections {
-				maxPrivateConnections = linkNumber[from]
-			}
-			if linkNumber[to] > maxPrivateConnections {
-				maxPrivateConnections = linkNumber[to]
-			}
 		}
 	}
 
-	result := drawDot(graph, linkNumber, maxPrivateConnections)
+	result := drawDot(graph, linkNumber, maxIntSlice(linkNumber))
 
 	return result, err
 }
