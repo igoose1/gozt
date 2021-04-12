@@ -20,7 +20,11 @@ var (
 
 const notesLessThan = 1 << 14 // log2(10 ^ 4)
 
-func a() ([]string, error) {
+func isSynopsis(note string) bool {
+	return note[0] == '9'
+}
+
+func a(withSynopsis bool) ([]string, error) {
 	dir, err := os.Open(Cwd)
 	if err != nil {
 		return nil, err
@@ -39,6 +43,9 @@ func a() ([]string, error) {
 		}
 		for _, file := range files {
 			if !file.IsDir() && validNoteName.MatchString(file.Name()) {
+				if !withSynopsis && isSynopsis(file.Name()) {
+					continue
+				}
 				notes = append(notes, file.Name())
 			}
 		}
@@ -123,7 +130,7 @@ func maxIntSlice(array []int) int {
 }
 
 func g() (string, error) {
-	allNotes, err := a()
+	allNotes, err := a(true)
 	if err != nil {
 		return "", err
 	}
@@ -153,7 +160,7 @@ func g() (string, error) {
 }
 
 func nextToLast(delta int) (string, error) {
-	notes, err := a()
+	notes, err := a(false)
 	if err != nil {
 		return "", err
 	}
@@ -175,7 +182,7 @@ func main() {
 	cmdName := path.Base(os.Args[0])
 	switch cmdName {
 	case "zt-a":
-		notes, err := a()
+		notes, err := a(true)
 		if err != nil {
 			log.Fatalln(err)
 		}
