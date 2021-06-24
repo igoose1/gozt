@@ -59,16 +59,16 @@ type edge struct {
 }
 
 func drawDot(graph map[edge]struct{}, linkNumber []int, maxPrivateConnections int) string {
-	result := make([]byte, 0, 1<<5*(2 + len(linkNumber) + len(graph)))
+	result := make([]byte, 0, 1<<5*(2+len(linkNumber)+len(graph)))
 
 	result = append(
 		result,
-		"digraph zt {\n" +
-		"\tgraph [truecolor=true bgcolor=pink model=subset]\n"+
-		"\tnode [colorscheme=ylgn9 style=filled shape=circle];\n"...,
+		"digraph zt {\n"+
+			"\tgraph [truecolor=true bgcolor=pink model=subset]\n"+
+			"\tnode [colorscheme=ylgn9 style=filled shape=circle];\n"...,
 	)
 	for i, ln := range linkNumber {
-		if ln == 0 {
+		if ln == -1 {
 			continue
 		}
 		color := int(8 * float64(ln) / float64(maxPrivateConnections))
@@ -90,7 +90,7 @@ func drawDot(graph map[edge]struct{}, linkNumber []int, maxPrivateConnections in
 }
 
 func contains(where []string, what string) bool {
-	for _, element := range(where) {
+	for _, element := range where {
 		if element == what {
 			return true
 		}
@@ -137,7 +137,14 @@ func g() (string, error) {
 
 	graph := make(map[edge]struct{})
 	maxNode, _ := strconv.ParseInt(maxStringSlice(allNotes), 10, 64)
-	linkNumber := make([]int, maxNode + 1)
+	linkNumber := make([]int, maxNode+1)
+	for i := range linkNumber {
+		linkNumber[i] = -1
+	}
+	for _, note := range allNotes {
+		noteNumber, _ := strconv.ParseInt(note, 10, 64)
+		linkNumber[noteNumber] = 0
+	}
 
 	for _, noteName := range allNotes {
 		data, err := ioutil.ReadFile(noteName)
