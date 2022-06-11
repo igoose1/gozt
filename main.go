@@ -183,6 +183,14 @@ func nextToLast(delta int) (string, error) {
 	return fmt.Sprintf("%04d", int(number)+delta), nil
 }
 
+const (
+	CmdNameZtA  = "zt-a"
+	CmdNameZtL  = "zt-l"
+	CmdNameZtLL = "zt-ll"
+	CmdNameZtN  = "zt-n"
+	CmdNameZtG  = "zt-g"
+)
+
 func main() {
 	var err error
 
@@ -193,7 +201,7 @@ func main() {
 
 	cmdName := path.Base(os.Args[0])
 	switch cmdName {
-	case "zt-a":
+	case CmdNameZtA:
 		notes, err := a(true)
 		if err != nil {
 			log.Fatalln(err)
@@ -201,25 +209,25 @@ func main() {
 		for _, note := range notes {
 			fmt.Println(note)
 		}
-	case "zt-l":
+	case CmdNameZtL:
 		note, err := nextToLast(0)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		fmt.Println(note)
-	case "zt-ll":
+	case CmdNameZtLL:
 		note, err := nextToLast(-1)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		fmt.Println(note)
-	case "zt-n":
+	case CmdNameZtN:
 		note, err := nextToLast(1)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		fmt.Println(note)
-	case "zt-g":
+	case CmdNameZtG:
 		graph, err := g()
 		if err != nil {
 			log.Fatalln(err)
