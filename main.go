@@ -100,7 +100,7 @@ func contains(where []string, what string) bool {
 	return false
 }
 
-// Do not play with that a lot, child! It's O(N^2).
+// Do not play with that a lot! It's O(N^2).
 func unique(array []string) []string {
 	result := make([]string, 0, len(array))
 	for _, element := range array {
