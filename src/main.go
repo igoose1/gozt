@@ -75,8 +75,10 @@ func drawDot(graph map[edge]struct{}, linkNumber []int, maxPrivateConnections in
 		if color < 1 {
 			color = 1
 		}
-		attrs := fmt.Sprintf("\t%04d [color=%d];\n", i, color)
-		result = append(result, attrs...)
+		result = append(
+			result,
+			fmt.Sprintf("\t%04d [color=%d];\n", i, color)...,
+		)
 	}
 
 	for e := range graph {
