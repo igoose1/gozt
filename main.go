@@ -173,6 +173,9 @@ func nextToLast(delta int) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if len(notes) == 0 {
+		log.Fatalln("no notes.")
+	}
 	number, err := strconv.ParseInt(notes[len(notes)-1], 10, 32)
 	if err != nil {
 		return "", err
