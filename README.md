@@ -26,3 +26,9 @@ To come back to the last note I've just closed I do ``vim `zt-l` ``.
 To count notes I do `zt-a | wc -l`.
 
 To draw a graph of connections I do `zt-g | dot -Tpng > g.png`.
+
+## How you use it
+
+Do what you want. Code is released under CC0. TL;DR: you can copy, modify,
+distribute and perform the work, even for commercial purposes, all without
+asking permission.
